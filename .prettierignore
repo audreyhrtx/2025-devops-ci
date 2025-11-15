@@ -1,0 +1,32 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+.next
+storybook-static
+.nitro
+
+# Config files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Generated files
+routeTree.gen.ts
+
+# Coverage
+coverage
+
+# Cache
+.cache
+.vite
+
+# Logs
+*.log
+
+# Environment variables
+.env*
+
+# macOS specific
+.DS_Store

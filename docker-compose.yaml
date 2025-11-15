@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    container_name: tanstack_app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    secrets:
+      - db_password
+    # Construct DATABASE_URL at container start from env vars + secret
+    command: ["/bin/sh", "-c", "export DATABASE_URL=postgres://${POSTGRES_USER}:$(cat /run/secrets/db_password)@db:5432/${POSTGRES_DB} && pnpm start"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  db:
+    image: postgres:16
+    container_name: tanstack_db
+    restart: always
+    environment:
+      # Use environment variables from .env (or defaults) and read password from Docker secret
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-todos}
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  pgdata:
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
